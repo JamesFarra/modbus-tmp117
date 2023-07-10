@@ -30,7 +30,7 @@ In addition, it'd be nice to know:
 Our ducted system is controlled by a locked-down Android tablet on the wall, that runs [the SkyZone app](https://play.google.com/store/apps/details?id=au.com.daikin.skyzone), and talks to an access point in the roof that sends commands to the indoor unit (which then talks to the outdoor unit). According to the indoor unit, the AP looks like one of those units you usually see on a ducted system on a wall with lots of buttons.
 
 ![The wall unit](wall_unit.jpg)
-![The roof unit (Access point)][roof_unit.jpg]
+![The roof unit (Access point)](roof_unit.jpg)
 
 As you might be able to see, the tablet has died, which gives me an excellent opportunity to come up with a system to replace it. IMO the current UI sucks, it wastes a bunch of space looking "pretty", and requires menu diving to do stuff like timers. I'd like my solution to replace the tablet. The [app page](https://play.google.com/store/apps/details?id=au.com.daikin.skyzone) has some screenshots to give you an idea of how much it sucks (also check out that 2.8 review score, looks like I'm not alone)
 
@@ -50,7 +50,7 @@ So what do I need my solution to do? Based on the above we came to:
 ## Previous Attempt
 I'll let you in on a secret, this is actually attempt two! Before the Pi shortage I thought nothing of using a Zero W to hook up to a few DS18B20s. The DS18B20 is a pretty cool chip, it's a temp sensor that sits on a OneWire bus, and has a 40-bit unique ID or something like that, so you can just buy a bunch, figure out which is which, then stick labels on them. I ran the signals through a couple pairs of a CAT6 cable we had spare from an Ethernet install. They are reasonably accurate (spec is ±0.25°C), but the units I got were as much as a deree apart without calibration:
 
-![DS18B20 Response Graph][old-graf-hd.png]
+![DS18B20 Response Graph](old-graf-hd.png)
 
 Running linux means a bunch of things I needed were already there:
 - File system for storing a *ton* of measurement data
@@ -60,16 +60,16 @@ Running linux means a bunch of things I needed were already there:
 Unfortunately, the DS18B20s started dropping like flies over a few months. Perhaps the sensors were counterfeits (prolific with that particular chip), or were never intended to be used in that way. This means **I have cables in the roof/walls that I'd like to re-use** (they were a PITA to put in)
 
 Here's me testing the first system, it's a protoboard on top of a Pi with some screw terminals in a 3D printed case:
-![The guts of the "Master" node of my last solution][guts.jpg]
+![The guts of the "Master" node of my last solution](guts.jpg)
 
 Here's the enclosures I CADed up and printed. The black one went in the roof (with holes for screws to screw into a beam) and the white one was supposed to match a wall plate and look decent as it would be visible on the wall:
-![The open enclosures][open.jpg]
+![The open enclosures](open.jpg)
 
 This is how it looked installed:
-![The previous temperature sensor][old_temp.jpg]
+![The previous temperature sensor](old_temp.jpg)
 
 ## The Solution
-![This is where the fun begins][fun.jpg]
+![This is where the fun begins](fun.jpg)
 
 ### Measure the key temperatures
 Selecting the right sensor is super important, luckily there is one standout contender - the TI TMP117 ([datasheet](https://www.ti.com/lit/ds/symlink/tmp117.pdf)). With the incredible ±0.1°C absolute accuracy, repeatability of 1 LSB (0.0078 degrees!!) when used correctly, and most units falling between 0.04 degrees of each other. Seriously, if anyone can find something better than this for under 50 bucks, I'll eat my metaphorical hat (my Tilley hemp hat will probably win).
@@ -87,7 +87,7 @@ A good way to simplify datalogging and UI is to just use linux on a Raspberry Pi
 
 ### System architecture
 Here is the final architecture I decided on:
-![Overarching design][overarching.excalidraw.png]
+![Overarching design](overarching.excalidraw.png)
 This meant I needed to design the master and slave boards, pick a touchscreen, and create some enclosures to put everything in.
 
 I've done a couple board designs in the past (and some of them even worked!) so I'm comfortable making up my own PCBs for this, in order to keep things small, and to meet the slightly odd requirements. Yes I'm aware that a few Pico Ws and PiicoDev TMP117s would likely be cheaper and a lot easier, but I wanted to reuse the wiring in the walls, and I've never worked with my own comms protocol or RS485 before, so it sounded like fun (and [what's the point if we can't have fun?](https://thebaffler.com/salvos/whats-the-point-if-we-cant-have-fun)). All that I've learnt about PCB design has come from Michael Ruppe's excellent KiCad Zero to Hero series on YouTube, trial and error, and advice from friends. I get that I might be brushing over things in this process, as it's hard to know the target audience of write ups like these, so if you're not familiar, The Factory has a miniseries on the full process that goes into more detail about the process from idea to product, and they'll do a better job of explaining than I will (who knows, maybe I'll get better with practice).
@@ -101,8 +101,8 @@ I've done a couple board designs in the past (and some of them even worked!) so 
 
 #### Slave Boards
 These basically just need to sit on the bus and respond to the master with temperature data when asked. Here's what I came up with:
-![Slave board schematic][schem.png]
-![Slave board PCB layout][slaveboard.png]
+![Slave board schematic](schem.png)
+![Slave board PCB layout](slaveboard.png)
 
 ##### Part Choices
 - ATtiny202 - This was a lovely part to pick, the tinyAVR range of microcontrollers, whilst only 8-bit, are dead-simple to implement. instead of external crystals, flash and 10 decoupling caps, you only need one decoupling capacitor, that's it.  The 202 is the most basic available I believe, with only 5 GPIO, and 2K of flash, but a quick test of compiling some hello world code with the `Wire` and `Serial` libraries confirmed that this would be enough. [SpencerKonde's excellent megaTinyCore](https://github.com/SpenceKonde/megaTinyCore) means you can program these with the Arduino IDE, and you actually get a bit *more* functionality than with an official arduino board (when it comes to which peripherals get used for which helper functions like `PWM`. The PiicoDev Smart modules are based of this series, I'm definitely not the first to use them as an I/O bridge
@@ -124,8 +124,8 @@ These basically just need to sit on the bus and respond to the master with tempe
 
 #### Master Board
 This one just has to take the UART pins from the 40-pin GPIO of the Pi, and hook it into the RS485 bus. Here's what I came up with:
-![Master schematic][masterschem.png]
-![Master Board Layout][masterboard.png]
+![Master schematic](masterschem.png)
+![Master Board Layout](masterboard.png)
 It has the same transceiver chip, and a buffer IC to sink current for the indicator LEDs (good to know when something's happening, and Pi pins can't sink/source much at all IIRC). It uses a tiny MOSFET for logic level shifting, as the transciever chip wants 5V to my knowledge.
 
 ### Assembly
@@ -136,9 +136,9 @@ I exported the BOM from KiCad, and searched constructed a "MyList" on Digi-key o
 Once the boards, stencils, and components had arrived. I assembled one master board and 2 slave boards, as a small-scale test to see if everything worked, or if I needed to make revisions. 
 
 
-![A microscope view of a slave board after pasting][microscope_paste.jpg]
-![A microscope view of the master board][microscope_master.jpg]
-![All the boards lined up][lined_up.jpg]
+![A microscope view of a slave board after pasting](microscope_paste.jpg)
+![A microscope view of the master board](microscope_master.jpg)
+![All the boards lined up](lined_up.jpg)
 
 ### Programming
 Programming the microcontrollers is pretty easy. They only use a single "Unified Programming and Debugging Interface (UPDI)" pin for programming, and all the hardware you need is a USB-to-serial converter, a diode, and a resistor. I made up a little programming board in this fashion a while back, shown below. You can find out more about this process from [the GitHub page of SpencerKonde's excellent MegaTinyCore](https://github.com/SpenceKonde/megaTinyCore#updi-programming).
@@ -187,10 +187,10 @@ void readTemp(){
 ```
 
 A bit ugly, but gets the job done. It was based on the sequence described in the TMP117 datasheet:
-![TMP Sequence][tmp_protocol.jpg]
+![TMP Sequence](tmp_protocol.jpg)
 
 When I saw the first ACK in my Logic software it made me veeeery happy :)
-![ACK Recieved!][ack.png]
+![ACK Recieved!](ack.png)
 
 #### Picking a protocol
 So I knew the type of communication (UART) and electrical specs (RS485), but I didn't know how to get data from multiple slaves over a single line, i.e. what the protocol would be.
@@ -206,7 +206,7 @@ A well-versed EE coworker recommended Modbus, an ancient protocol that's still i
 #### Modbus
 There are 2 ways you can send Modbus over serial: Modbus-RTU and Modbus-ASCII. Modbus-RTU is *much* more common according to the internet, but requires the use of non-standard 3.5+ character "breaks" where the line is held low. This is easy enough to do on the ATtiny with all its easily accessible timers, but it's just too hard on a Pi. SO instead I'll be going with Modbus-ASCII. 
 
-![Modbus-ASCII at work][modbus_ascii.excalidraw.png]
+![Modbus-ASCII at work](modbus_ascii.excalidraw.png)
 
 So I whipped up some C code to do just that:
 ```c
@@ -229,7 +229,7 @@ uint8_t* parseChar(uint8_t inputByte){
 ```
 
 Next up is getting my code to follow the state diagram that describes the protocol:
-![Protocol state diagram, now with extra scribbles][states.excalidraw.png]
+![Protocol state diagram, now with extra scribbles](states.excalidraw.png)
 
 ## Pi<->ATtiny Unit Test
 [Linux Serial Ports Using C/C++ | mbedded.ninja](https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/)
