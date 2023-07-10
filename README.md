@@ -29,7 +29,7 @@ In addition, it'd be nice to know:
 ### Existing system
 Our ducted system is controlled by a locked-down Android tablet on the wall, that runs [the SkyZone app](https://play.google.com/store/apps/details?id=au.com.daikin.skyzone), and talks to an access point in the roof that sends commands to the indoor unit (which then talks to the outdoor unit). According to the indoor unit, the AP looks like one of those units you usually see on a ducted system on a wall with lots of buttons.
 
-![The wall unit][wall_unit.jpg]
+![The wall unit](wall_unit.jpg)
 ![The roof unit (Access point)][roof_unit.jpg]
 
 As you might be able to see, the tablet has died, which gives me an excellent opportunity to come up with a system to replace it. IMO the current UI sucks, it wastes a bunch of space looking "pretty", and requires menu diving to do stuff like timers. I'd like my solution to replace the tablet. The [app page](https://play.google.com/store/apps/details?id=au.com.daikin.skyzone) has some screenshots to give you an idea of how much it sucks (also check out that 2.8 review score, looks like I'm not alone)
